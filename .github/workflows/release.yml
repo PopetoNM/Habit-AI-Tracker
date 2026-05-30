@@ -1,0 +1,89 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build ${{ matrix.platform }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: macOS
+            os: macos-latest
+            command: npm run package:mac
+            artifact: macos
+          - platform: Windows
+            os: windows-latest
+            command: npm run package:win
+            artifact: windows
+          - platform: Linux
+            os: ubuntu-latest
+            command: npm run package:linux
+            artifact: linux
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install Linux packaging dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libarchive-tools rpm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Unit tests
+        run: npm test -- --run
+
+      - name: Build installer
+        run: ${{ matrix.command }}
+
+      - name: Upload installer artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: habit-ai-tracker-${{ matrix.artifact }}
+          path: |
+            dist/*.dmg
+            dist/*.exe
+            dist/*.AppImage
+            dist/*.deb
+            dist/*.blockmap
+            dist/latest*.yml
+          if-no-files-found: error
+
+  publish:
+    name: Publish GitHub release
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release-artifacts
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release-artifacts/**/*
+          generate_release_notes: true

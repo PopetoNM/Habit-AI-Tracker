@@ -4,6 +4,16 @@ Local-first Electron desktop app for a spreadsheet-style habit dashboard, weekly
 
 New installs start with an empty profile, no starter projects, and no starter habits. Your data stays local on your machine.
 
+## Screenshots
+
+![Habit AI Tracker dashboard](docs/screenshots/dashboard.png)
+
+| Weekly planner                                       | AI coach visual mode                                          |
+| ---------------------------------------------------- | ------------------------------------------------------------- |
+| ![Weekly planner](docs/screenshots/week-planner.png) | ![AI coach visual mode](docs/screenshots/ai-coach-visual.png) |
+
+![Focus timer](docs/screenshots/focus-timer.png)
+
 ## Stack
 
 - Electron + React + TypeScript + Vite
@@ -16,6 +26,16 @@ New installs start with an empty profile, no starter projects, and no starter ha
 - Vitest for deterministic unit tests
 
 ## Install
+
+### Download The App
+
+Go to [Releases](https://github.com/PopetoNM/Habit-AI-Tracker/releases) and download the installer for your OS:
+
+- macOS: `.dmg`
+- Windows: `.exe`
+- Linux: `.AppImage` or `.deb`
+
+The app is currently unsigned. On macOS, right-click the app and choose **Open** the first time. On Windows, SmartScreen may require **More info** -> **Run anyway**.
 
 ### Requirements
 
@@ -76,6 +96,17 @@ npm run package:mac
 
 The packaged app is written to `dist/`.
 
+### Create A Release
+
+Maintainers can create downloadable installers by pushing a version tag:
+
+```bash
+git tag v0.1.0
+git push origin v0.1.0
+```
+
+GitHub Actions builds macOS, Windows, and Linux installers and attaches them to the release.
+
 ## First-Run Setup
 
 1. Open Settings.
@@ -89,6 +120,14 @@ No personal habits, profile, or planner templates are shipped with the repositor
 ## Data And Privacy
 
 Runtime data is stored in Electron `userData` on your machine. Local script data is stored under `data/`, which is ignored by git.
+
+Typical locations:
+
+- macOS: `~/Library/Application Support/habit-ai-tracker/`
+- Windows: `%APPDATA%/habit-ai-tracker/`
+- Linux: `~/.config/habit-ai-tracker/`
+
+Your habits, check-ins, planner blocks, coach history, focus sessions, and backups live there. Back up that folder if you rely on the app every day.
 
 Do not commit local databases, exports, backups, `.env` files, or internal workflow artifacts. The repo ignores:
 
@@ -109,6 +148,14 @@ npm run typecheck
 npm test -- --run
 npm run test:e2e
 ```
+
+## Daily Use Notes
+
+- The tracker works fully offline except for optional Ollama model calls.
+- The AI coach needs Ollama running locally.
+- Voice transcription runs locally and may download the Whisper model on first use.
+- Data persists automatically in the Electron user data folder.
+- Use Settings to add your own habits and profile before relying on the coach.
 
 ## License
 
